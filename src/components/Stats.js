@@ -1,13 +1,22 @@
+import { useEffect, useState } from "react";
 import Table from "./Table";
 import Selector from "./Selector";
-import { useEffect, useState } from "react";
+import Dropdown from "./Dropdown";
 import axios from "../axios";
 import requests from "../requests";
 
 const Stats = ({ player }) => {
+  const options = [];
+  const baseSeason = 2020;
+  for (var i = 0; i < 40; i++) {
+    options.push({
+      text: baseSeason - i + "-" + (baseSeason - i + 1),
+      value: baseSeason - i,
+    });
+  }
+
   const [loading, setLoading] = useState(true);
-  const [season, setSeason] = useState(2020);
-  //   const [postseason, setPostseason] = useState(false);
+  const [season, setSeason] = useState(options[0]);
   const [seasonAvg, setSeasonAvg] = useState({});
 
   useEffect(() => {
@@ -15,7 +24,7 @@ const Stats = ({ player }) => {
     axios
       .get(requests.getSeasonAverages, {
         params: {
-          season: season,
+          season: season.value,
           player_ids: [player.id],
         },
       })
@@ -44,15 +53,6 @@ const Stats = ({ player }) => {
     //     console.log(err);
     //   });
   }, [season, player]);
-
-  const options = [];
-  const baseSeason = 2020;
-  for (var i = 0; i < 21; i++) {
-    options.push({
-      text: baseSeason - i + "-" + (baseSeason - i + 1),
-      value: baseSeason - i,
-    });
-  }
 
   const displayWeight = () => {
     return player.height_feet ? (
@@ -90,7 +90,7 @@ const Stats = ({ player }) => {
     }
 
     return seasonAvg ? (
-      <Table seasonAvg={seasonAvg} season={season} />
+      <Table seasonAvg={seasonAvg} />
     ) : (
       <div className="ui message">
         <p>No stats for this season.</p>
@@ -111,13 +111,18 @@ const Stats = ({ player }) => {
       </div>
       <div className="ui divider"></div>
       <div>
-        <b>Season: </b>
-        <Selector
+        {/* <Selector
           placeholder={season + "-" + (season + 1)}
           options={options}
           onChange={(value) => {
             setSeason(value);
-          }}
+          }
+        /> */}
+        <Dropdown
+          label="Season:"
+          options={options}
+          selected={season}
+          onSelectedChange={setSeason}
         />
       </div>
       {displayTable()}
